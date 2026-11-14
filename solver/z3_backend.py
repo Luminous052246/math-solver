@@ -1,11 +1,6 @@
-"""Z3 后端:整数/实数线性约束求解。
+"""Z3 后端:按 TaskSpec 求解整数/实数约束。
 
-支持的题目格式:
-    find integers x and y such that x + y = 10 and x - y = 4
-    find integers x such that x > 3 and x < 6 and x != 4
-
-Z3 是 SMT 求解器,能给出可满足解、判定无解,并检查解是否唯一。
-约束中的表达式用 Python AST 安全解析,不使用 eval。
+自然语言格式由 rules.py 解析。约束表达式用 Python AST 解释,不使用 eval。
 """
 
 from __future__ import annotations
@@ -15,10 +10,60 @@ import re
 
 import z3
 
+from .taskspec import TaskSpec
 from .types import Solution
 from .verify import Verification, attach
 
 _COMPARATOR_RE = re.compile(r"==|!=|<=|>=|=|<|>")
+
+
+def _is_python_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _as_real(value):
+    if isinstance(value, bool):
+        raise ValueError("不支持布尔字面量")
+    if isinstance(value, int):
+        return z3.RealVal(value)
+    if isinstance(value, float):
+        return z3.RealVal(value)
+    if z3.is_int(value):
+        return z3.ToReal(value)
+    if z3.is_real(value):
+        return value
+    raise ValueError("除法 / 的操作数无法按实数解释")
+
+
+def _math_div(left, right):
+    """`/` 按有理数或实数除法解释，不改成整数除法。"""
+    if _is_python_number(left) and _is_python_number(right):
+        return left / right
+    return _as_real(left) / _as_real(right)
+
+
+def _as_int(value, label: str):
+    if isinstance(value, bool) or isinstance(value, float):
+        raise ValueError(f"{label}只能用于整数")
+    if isinstance(value, int) or z3.is_int(value):
+        return value
+    raise ValueError(f"{label}只能用于整数")
+
+
+def _int_div(left, right):
+    """`//` 是显式整数除法。实数操作数直接拒绝。"""
+    left_value = _as_int(left, "整数除法 // ")
+    right_value = _as_int(right, "整数除法 // ")
+    if isinstance(left_value, int) and isinstance(right_value, int):
+        return left_value // right_value
+    return left_value / right_value
+
+
+def _int_mod(left, right):
+    """`%` 是整数取模。实数操作数直接拒绝。"""
+    left_value = _as_int(left, "取模 % ")
+    right_value = _as_int(right, "取模 % ")
+    return left_value % right_value
 
 
 def _eval_node(node: ast.AST, env: dict):
@@ -44,11 +89,11 @@ def _eval_node(node: ast.AST, env: dict):
         if isinstance(node.op, ast.Mult):
             return left * right
         if isinstance(node.op, ast.Div):
-            return left / right
+            return _math_div(left, right)
         if isinstance(node.op, ast.FloorDiv):
-            return left / right
+            return _int_div(left, right)
         if isinstance(node.op, ast.Mod):
-            return left % right
+            return _int_mod(left, right)
         raise ValueError("不支持二元运算符")
 
     if isinstance(node, ast.UnaryOp):
@@ -94,38 +139,17 @@ def _parse_constraint(text: str, env: dict):
     raise ValueError(f"不支持的比较符: {op}")
 
 
-def solve(text: str) -> Solution:
-    match = re.search(
-        r"find\s+(integers?|reals?)\s+(.+?)\s+such that\s+(.+)",
-        text,
-        flags=re.IGNORECASE,
-    )
-    if not match:
-        raise ValueError(
-            "约束题格式应为: find integers x and y such that <约束1> and <约束2>"
-        )
-
-    domain = match.group(1).lower()
-    var_names = [
-        name
-        for name in re.findall(r"[a-zA-Z]\w*", match.group(2))
-        if name.lower() not in {"and", "or"}
-    ]
+def execute(spec: TaskSpec) -> Solution:
+    """按约束任务的变量、定义域和约束列表求解。"""
+    var_names = list(spec.variables)
+    constraints = list(spec.constraints)
     if not var_names:
         raise ValueError("未找到变量声明")
-
-    use_int = domain.startswith("integer")
-    env = {
-        name: z3.Int(name) if use_int else z3.Real(name) for name in var_names
-    }
-
-    constraints = [
-        part.strip()
-        for part in re.split(r"\s+and\s+", match.group(3))
-        if part.strip()
-    ]
     if not constraints:
         raise ValueError("未找到约束条件")
+
+    use_int = spec.domain == "integer"
+    env = {name: z3.Int(name) if use_int else z3.Real(name) for name in var_names}
 
     solver = z3.Solver()
     parsed_constraints = [_parse_constraint(constraint, env) for constraint in constraints]
@@ -140,7 +164,7 @@ def solve(text: str) -> Solution:
     result = solver.check()
     if result == z3.unsat:
         solution = Solution(
-            problem=text,
+            problem="",
             problem_type="constraint",
             backend="z3",
             ok=True,
@@ -150,7 +174,7 @@ def solve(text: str) -> Solution:
         return attach(solution, Verification(None, "无解结论未做独立验证"))
     if result == z3.unknown:
         return Solution(
-            problem=text,
+            problem="",
             problem_type="constraint",
             backend="z3",
             ok=False,
@@ -171,7 +195,7 @@ def solve(text: str) -> Solution:
 
     answer = ", ".join(f"{name} = {value}" for name, value in values)
     solution = Solution(
-        problem=text,
+        problem="",
         problem_type="constraint",
         backend="z3",
         ok=True,

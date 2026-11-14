@@ -1,10 +1,10 @@
 """规则优先、LLM 兜底的规划层。
 
 流程:
-    1. 先用规则求解器直接尝试(零 token、零网络)。
-    2. 规则失败,或规则结果未通过独立验证,且配置了 LLM 时,
-       让模型把题目翻译成 :class:`TaskSpec`(只翻译,不计算)。
-    3. 校验任务描述,再交给 SymPy / Z3 确定性执行。
+    1. 规则解析器把题目译成 TaskSpec 并执行(零 token、零网络)。
+    2. 规则失败,或结果未通过独立验证,且配置了 LLM 时,
+       让模型把题目翻译成 TaskSpec(只翻译,不计算)。
+    3. 两条路径都校验任务描述,再按字段交给 SymPy / Z3 执行。
 
 模型输出只决定"算什么",不决定"答案是什么"。
 """
@@ -13,7 +13,8 @@ from __future__ import annotations
 
 from typing import Callable
 
-from .core import solve_problem, solve_route
+from .core import solve_problem
+from .engine import execute_spec
 from .llm import complete_chat, llm_available
 from .taskspec import SpecError, TaskSpec
 from .types import Solution
@@ -91,26 +92,6 @@ def plan_with_llm(text: str, complete: Complete) -> TaskSpec:
             raise SpecError(
                 f"LLM 两次输出都不符合协议: {second_error}"
             ) from second_error
-
-
-def execute_spec(spec: TaskSpec, original_problem: str) -> Solution:
-    """执行结构化任务;题型已确定,直接调用对应后端。"""
-    canonical = spec.canonical_problem()
-    try:
-        solution = solve_route(spec.type, canonical)
-    except Exception as exc:
-        solution = Solution(
-            problem=original_problem,
-            problem_type=spec.type,
-            ok=False,
-            error=f"{type(exc).__name__}: {exc}",
-        )
-    solution.problem = original_problem
-    solution.problem_type = spec.type
-    solution.planner = "spec"
-    solution.task = spec.to_dict()
-    solution.steps.insert(0, f"结构化任务: {canonical}")
-    return solution
 
 
 def solve_with_planner(

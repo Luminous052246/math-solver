@@ -1,8 +1,8 @@
 """结构化任务协议。
 
-Agent 的每个前端(规则解析、LLM 规划、外部调用方)都输出同一份
-:class:`TaskSpec`,再由确定性后端执行。LLM 只负责"翻译"题目,
-不负责计算;所有数值结果仍由 SymPy / Z3 产生。
+规则解析、LLM 规划和外部调用方都输出同一份 :class:`TaskSpec`，
+再由确定性后端按字段执行。后端不会把任务渲染成英文题面后重新解析。
+LLM 只负责翻译题目，不负责计算；数值结果仍由 SymPy / Z3 产生。
 
 协议字段按题型裁剪,未使用的字段可以为空。
 """
@@ -340,16 +340,12 @@ class TaskSpec:
         except Exception as exc:
             raise SpecError(f"{label} 无法解析: {text!r} ({exc})") from exc
 
-    # ------------------------------------------------------------------
-    # 渲染为现有后端接受的规范题面
-    # ------------------------------------------------------------------
-
     @property
     def main_variable(self) -> str:
         return self.variables[0] if self.variables else "x"
 
     def canonical_problem(self) -> str:
-        """把 TaskSpec 转成确定性后端能直接解析的题面。"""
+        """渲染成可读题面，仅用于展示。执行路径不解析这段文字。"""
         kind = self.type
         var = self.main_variable
 

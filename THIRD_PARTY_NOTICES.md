@@ -2,7 +2,7 @@
 
 ## KaTeX
 
-`webapp_assets/katex/` 内的 CSS、JavaScript 与字体文件来自 [KaTeX](https://katex.org/)，用于浏览器端公式渲染。
+`app/assets/katex/` 内的 CSS、JavaScript 与字体文件来自 [KaTeX](https://katex.org/)，用于浏览器端公式渲染。
 
 The MIT License (MIT)
 

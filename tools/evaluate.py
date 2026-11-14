@@ -5,15 +5,21 @@
     - 答案正确率:最终答案与标准答案等价
 
 用法:
-    python evaluate.py
-    python evaluate.py --file data/problems.jsonl --verbose
+    python tools/evaluate.py
+    python tools/evaluate.py --file data/problems.jsonl --verbose
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import defaultdict
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from solver import answers_equivalent, solve_problem
 
@@ -34,7 +40,7 @@ def verification_label(solution) -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="评估数学求解器")
-    parser.add_argument("--file", type=str, default="data/problems.jsonl")
+    parser.add_argument("--file", type=str, default=str(ROOT / "data" / "problems.jsonl"))
     parser.add_argument("--verbose", "-v", action="store_true", help="打印每一题")
     return parser.parse_args()
 

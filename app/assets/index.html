@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Math Solver · 符号计算求解器</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%234f46e5'/%3E%3Ctext x='50' y='71' font-size='56' text-anchor='middle' fill='white' font-family='Georgia,serif'%3E%E2%88%91%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/katex/katex.min.css">
+<script defer src="/assets/katex/katex.min.js"></script>
+<link rel="stylesheet" href="/assets/style.css">
+
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="logo">∑</div>
+    <div>
+      <h1>Math Solver</h1>
+      <p>符号计算求解器 · 答案由 SymPy / Z3 计算</p>
+    </div>
+    <span class="badge">本地运行</span>
+  </header>
+
+  <main>
+    <section class="card input-card">
+      <textarea id="problem" spellcheck="false" placeholder="输入数学题，例如：integrate x**2 from 0 to 1"></textarea>
+      <div class="chips-row">
+        <span class="chips-label">示例</span>
+        <div class="chips" id="exampleChips"></div>
+      </div>
+      <div class="toolbar">
+        <button class="btn primary" id="solveBtn">求解</button>
+        <button class="btn" id="uploadBtn">上传图片</button>
+        <button class="btn" id="padBtn">手写板</button>
+        <button class="btn" id="clearBtn">清空</button>
+        <input type="file" id="imageInput" accept="image/*" hidden>
+        <span class="shortcut">Ctrl + Enter 快速求解</span>
+        <span class="status" id="solveStatus"></span>
+      </div>
+      <div class="preview-row hidden" id="previewRow">
+        <img id="imagePreview" alt="题目图片预览">
+        <div class="preview-info">
+          <span class="preview-name" id="previewName"></span>
+          <span class="preview-note" id="previewNote"></span>
+        </div>
+        <button class="btn small" id="removeImage" type="button">移除</button>
+      </div>
+    </section>
+
+    <div id="result"></div>
+
+    <details class="card help">
+      <summary>支持的题型与输入格式</summary>
+      <div class="help-inner">
+        <div class="help-scroll">
+          <table class="help-table">
+            <thead><tr><th>题型</th><th>输入示例</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>算术</td><td><code>calculate (12 + 8) / 4</code></td><td>也支持直接写 <code>2**10</code></td></tr>
+              <tr><td>化简</td><td><code>simplify sin(x)**2 + cos(x)**2</code></td><td>中文 <code>化简</code> 同义</td></tr>
+              <tr><td>方程</td><td><code>solve x**2 - 5*x + 6 = 0</code></td><td>方程组用 <code>and</code> 连接</td></tr>
+              <tr><td>求导/偏导</td><td><code>differentiate x**3 + 2*x with respect to x</code></td><td><code>partial derivative ...</code> 为偏导</td></tr>
+              <tr><td>积分</td><td><code>integrate x**2 from 0 to 1</code></td><td><code>from A to B</code> 表示定积分</td></tr>
+              <tr><td>极限</td><td><code>limit of sin(x)/x as x -&gt; 0</code></td><td>支持 <code>0+</code>、<code>0-</code>、<code>infinity</code></td></tr>
+              <tr><td>级数</td><td><code>series of exp(x) around 0 to order 5</code></td><td>支持泰勒 / 麦克劳林</td></tr>
+              <tr><td>微分方程</td><td><code>solve the ode y' = 2*x</code></td><td>支持 <code>y'</code>、<code>y''</code>、<code>dy/dx</code></td></tr>
+              <tr><td>矩阵</td><td><code>determinant of [[1,2],[3,4]]</code></td><td>行列式 / 特征值 / 逆 / 转置 / 秩</td></tr>
+              <tr><td>数论</td><td><code>factorize 360</code></td><td>gcd、lcm、质因数、质数</td></tr>
+              <tr><td>约束</td><td><code>find integers x and y such that x + y = 10 and x - y = 4</code></td><td>Z3 求解,可判定无解与唯一性</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="caption">
+          常用中文关键词:计算、化简、解方程、求导、偏导、积分、极限、趋于、泰勒展开、微分方程、矩阵、特征值、质数、最大公约数。<br>
+          应用题型或自然语言描述会触发本地 Ollama 规划;也可以点击"上传图片"或在"手写板"上书写,由本地 qwen2.5vl 识别后填入输入框。<br>
+          规则驱动不支持图形题与多步应用题。
+        </p>
+      </div>
+    </details>
+
+    <footer>规则优先 · 未命中时由本地 Ollama 规划 · 全部计算在本地完成</footer>
+  </main>
+</div>
+
+<div class="modal-backdrop hidden" id="padModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="padTitle">
+    <div class="modal-head">
+      <h3 id="padTitle">手写板</h3>
+      <span class="modal-note" id="padStatus">按住鼠标或触控笔写下题目</span>
+    </div>
+    <div class="pad-wrap">
+      <canvas class="pad" id="pad"></canvas>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="padUndo" type="button">撤销</button>
+      <button class="btn" id="padClear" type="button">清空</button>
+      <span class="spacer"></span>
+      <button class="btn" id="padCancel" type="button">取消</button>
+      <button class="btn primary" id="padRecognize" type="button">识别题目</button>
+    </div>
+  </div>
+</div>
+
+<script>window.MATH_SOLVER_EXAMPLES = /*__EXAMPLES__*/;</script>
+<script defer src="/assets/app.js"></script>
+</body>
+</html>
