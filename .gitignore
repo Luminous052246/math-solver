@@ -1,0 +1,41 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 打包产物
+build/
+dist/
+*.spec
+
+# 临时文件
+_*.txt
+_*.json
+_*.py
+!__init__.py
+_*.png
+_*.jpg
+_*.jpeg
+*.log
+
+# 本地模型（Ollama 模型权重，勿提交）
+models/
+*.gguf
+
+# 本地配置与密钥
+.env
+.env.*
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 压缩包
+*.zip

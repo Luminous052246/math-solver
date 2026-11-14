@@ -1,0 +1,60 @@
+{"input": "3*(4 + 5) - 2", "expected": "25", "type": "arithmetic"}
+{"input": "calculate (12 + 8) / 4", "expected": "5", "type": "arithmetic"}
+{"input": "what is 1/3 + 1/6", "expected": "1/2", "type": "arithmetic"}
+{"input": "2**10", "expected": "1024", "type": "arithmetic"}
+{"input": "compute 7 % 5 + 3", "expected": "5", "type": "arithmetic"}
+{"input": "12 / 8", "expected": "3/2", "type": "arithmetic"}
+{"input": "simplify (x**2 - 1)/(x - 1)", "expected": "x + 1", "type": "simplify"}
+{"input": "simplify sin(x)**2 + cos(x)**2", "expected": "1", "type": "simplify"}
+{"input": "化简 (x + 1)**2 - x**2", "expected": "2*x + 1", "type": "simplify"}
+{"input": "differentiate x**3 + 2*x with respect to x", "expected": "3*x**2 + 2", "type": "derivative"}
+{"input": "derivative of sin(x)", "expected": "cos(x)", "type": "derivative"}
+{"input": "differentiate x**2 * exp(x) with respect to x", "expected": "x**2*exp(x) + 2*x*exp(x)", "type": "derivative"}
+{"input": "求导 x**3 + x", "expected": "3*x**2 + 1", "type": "derivative"}
+{"input": "partial derivative of x**2*y with respect to y", "expected": "x**2", "type": "derivative"}
+{"input": "integrate x**2 with respect to x", "expected": "x**3/3", "type": "integral"}
+{"input": "integral of cos(x)", "expected": "sin(x)", "type": "integral"}
+{"input": "integrate 2*x + 1 with respect to x", "expected": "x**2 + x", "type": "integral"}
+{"input": "integrate x**2 from 0 to 1", "expected": "1/3", "type": "integral"}
+{"input": "integrate e**x", "expected": "exp(x)", "type": "integral"}
+{"input": "integrate e**x from 0 to 1", "expected": "e - 1", "type": "integral"}
+{"input": "limit of sin(x)/x as x -> 0", "expected": "1", "type": "limit"}
+{"input": "limit (1 + 1/x)**x as x -> infinity", "expected": "e", "type": "limit"}
+{"input": "当 x 趋于 0 时 (exp(x) - 1)/x 的极限", "expected": "1", "type": "limit"}
+{"input": "limit of 1/x as x -> 0+", "expected": "oo", "type": "limit"}
+{"input": "limit of (1 - cos(x))/x**2 as x -> 0", "expected": "1/2", "type": "limit"}
+{"input": "series of exp(x) around 0 to order 5", "expected": "x**4/24 + x**3/6 + x**2/2 + x + 1", "type": "series"}
+{"input": "taylor series of sin(x) at 0 to order 6", "expected": "x**5/120 - x**3/6 + x", "type": "series"}
+{"input": "将 exp(x) 在 x=0 处泰勒展开到 3 阶", "expected": "1 + x + x**2/2", "type": "series"}
+{"input": "maclaurin series of cos(x) to order 4", "expected": "1 - x**2/2", "type": "series"}
+{"input": "solve the ode y' = 2*x", "expected": "y(x) = C1 + x**2", "type": "ode"}
+{"input": "solve y'' - 3*y' + 2*y = 0", "expected": "y(x) = C1*exp(x) + C2*exp(2*x)", "type": "ode"}
+{"input": "微分方程 y' + y = 0", "expected": "y(x) = C1*exp(-x)", "type": "ode"}
+{"input": "dy/dx = 2*x*y", "expected": "y(x) = C1*exp(x**2)", "type": "ode"}
+{"input": "determinant of [[1,2],[3,4]]", "expected": "-2", "type": "matrix"}
+{"input": "eigenvalues of [[2,0],[0,3]]", "expected": "2, 3", "type": "matrix"}
+{"input": "逆矩阵 [[1,2],[3,4]]", "expected": "[[-2, 1], [3/2, -1/2]]", "type": "matrix"}
+{"input": "rank of [[1,2],[2,4]]", "expected": "1", "type": "matrix"}
+{"input": "transpose of [[1,2],[3,4]]", "expected": "[[1, 3], [2, 4]]", "type": "matrix"}
+{"input": "solve 2*x + 3 = 7 for x", "expected": "x = 2", "type": "equation"}
+{"input": "solve x**2 - 5*x + 6 = 0", "expected": "x = 2 or x = 3", "type": "equation"}
+{"input": "solve x + 5 = 12", "expected": "x = 7", "type": "equation"}
+{"input": "solve 3*x - 9 = 0", "expected": "x = 3", "type": "equation"}
+{"input": "解方程 2x + 4 = 10", "expected": "x = 3", "type": "equation"}
+{"input": "solve x**2 = 4", "expected": "x = -2 or x = 2", "type": "equation"}
+{"input": "solve 2*x + y = 7 and x - y = 2", "expected": "x = 3, y = 1", "type": "equation"}
+{"input": "solve x + y = 10 and x - y = 4", "expected": "x = 7, y = 3", "type": "equation"}
+{"input": "solve 3*x + 2*y = 12 and x - y = 1", "expected": "x = 14/5, y = 9/5", "type": "equation"}
+{"input": "solve x + y = 5 and x + y = 6", "expected": "无解", "type": "equation"}
+{"input": "gcd(48, 18)", "expected": "6", "type": "number_theory"}
+{"input": "lcm of 12 and 15", "expected": "60", "type": "number_theory"}
+{"input": "factorize 360", "expected": "2**3 * 3**2 * 5", "type": "number_theory"}
+{"input": "is 97 prime", "expected": "yes", "type": "number_theory"}
+{"input": "is 91 prime", "expected": "no", "type": "number_theory"}
+{"input": "gcd of 1071 and 462", "expected": "21", "type": "number_theory"}
+{"input": "find integers x and y such that x + y = 10 and x - y = 4", "expected": "x = 7, y = 3", "type": "constraint"}
+{"input": "find integers x such that x > 3 and x < 6 and x != 4", "expected": "x = 5", "type": "constraint"}
+{"input": "find integers x and y such that 2*x + y = 7 and x + 2*y = 8", "expected": "x = 2, y = 3", "type": "constraint"}
+{"input": "find integers x such that x + 1 = x", "expected": "无解", "type": "constraint"}
+{"input": "find integers x and y such that x + y = 4 and x > y and x < 4", "expected": "x = 3, y = 1", "type": "constraint"}
+{"input": "find integers x and y such that x + 2*y = 10 and y = 3", "expected": "x = 4, y = 3", "type": "constraint"}
