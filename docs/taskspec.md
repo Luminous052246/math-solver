@@ -17,7 +17,7 @@ solution = execute_spec(spec, "原题")
 命令行可以直接执行一份 JSON：
 
 ```bash
-python solve.py --task '{"type":"integral","expression":"x**2","bounds":{"lower":"0","upper":"1"}}'
+python -m app.cli --task '{"type":"integral","expression":"x**2","bounds":{"lower":"0","upper":"1"}}'
 ```
 
 表达式使用 Python / SymPy 语法：乘方是 `**`，自然对数是 `log`，无穷是 `oo`。字段在进入后端前会做协议校验；表达式再经过字符白名单解析。

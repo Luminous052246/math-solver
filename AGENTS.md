@@ -6,7 +6,7 @@
 
 - 数值答案只由 SymPy 或 Z3 产生。模型只把题目翻译成 `TaskSpec`。
 - `solver/engine.py` 按任务字段执行。`canonical_problem()` 只用于展示。
-- 用户输入的表达式经过 `solver/text.py` 的字符限制后解析，不使用 `eval`。Z3 约束用 AST 解释。矩阵字面量用 `ast.literal_eval`。
+- 用户输入的表达式先经过 `solver/text.py` 的字符限制，再用 SymPy 的 `parse_expr` 解析。Z3 约束用 AST 解释。矩阵字面量用 `ast.literal_eval`。
 - 网页默认只监听 `127.0.0.1`，没有鉴权。
 - 版本号只写在 `pyproject.toml`。`tools/make_release.py` 只打包 Git 已跟踪的文件。
 

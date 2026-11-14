@@ -137,6 +137,27 @@ _ROUTES = {
 }
 
 
+_HINT_CONTINUATIONS = {
+    "factor": ("s", "ize", "ization"),
+    "eigen": ("value", "values"),
+}
+
+
+def _contains_hint(hint: str, low: str) -> bool:
+    """英文关键词按词边界匹配，中文关键词仍按子串匹配。"""
+    if not re.search(r"[a-z]", hint):
+        return hint in low
+    if hint == "lim ":
+        return re.search(r"(?<![a-z])lim(?![a-z])", low) is not None
+    if hint == "d/d":
+        return re.search(r"(?<![a-z])d/d", low) is not None
+    if any(character in hint for character in "/'"):
+        return re.search(rf"(?<![a-z]){re.escape(hint)}(?![a-z])", low) is not None
+    continuations = _HINT_CONTINUATIONS.get(hint, ("s",))
+    suffix = "(?:" + "|".join(re.escape(item) for item in continuations) + ")?"
+    return re.search(rf"(?<![a-z]){re.escape(hint)}{suffix}(?![a-z])", low) is not None
+
+
 def _strip_prefixes(text: str, patterns: list[str]) -> str:
     """去掉句首的题型关键词。长的模式应排在前面。"""
     result = text
@@ -150,7 +171,7 @@ def _strip_prefixes(text: str, patterns: list[str]) -> str:
 def _select_route(low: str) -> tuple[str, str | None]:
     for route, hints in _ROUTE_TABLE:
         for hint in hints:
-            if hint in low:
+            if _contains_hint(hint, low):
                 return route, hint
     if "=" in low:
         return "equation", "="
@@ -208,7 +229,7 @@ def _parse_derivative(text: str) -> TaskSpec:
     data: dict = {"type": "derivative", "expression": expression}
     if var_name:
         data["variables"] = [var_name]
-    if "partial" in text.lower() or "偏导" in text:
+    if _contains_hint("partial", text.lower()) or "偏导" in text:
         data["goal"] = "partial"
     return TaskSpec.from_dict(data)
 
@@ -382,15 +403,15 @@ def _parse_matrix_literal(text: str) -> list[list[float]]:
 def _parse_matrix(text: str) -> TaskSpec:
     low = text.lower()
     matrix = _parse_matrix_literal(text)
-    if "行列式" in text or "determinant" in low or re.search(r"\bdet\b", low):
+    if "行列式" in text or _contains_hint("determinant", low) or re.search(r"\bdet\b", low):
         operation = "determinant"
-    elif "特征值" in text or "eigen" in low:
+    elif "特征值" in text or _contains_hint("eigen", low):
         operation = "eigenvalues"
-    elif "逆矩阵" in text or "inverse" in low:
+    elif "逆矩阵" in text or _contains_hint("inverse", low):
         operation = "inverse"
-    elif "转置" in text or "transpose" in low:
+    elif "转置" in text or _contains_hint("transpose", low):
         operation = "transpose"
-    elif "秩" in text or re.search(r"\brank\b", low):
+    elif "秩" in text or _contains_hint("rank", low):
         operation = "rank"
     else:
         raise ValueError("无法识别矩阵操作,支持:行列式、特征值、逆矩阵、转置、秩")
@@ -404,13 +425,13 @@ def _parse_number_theory(text: str) -> TaskSpec:
     numbers = [int(n) for n in re.findall(r"-?\d+", text)]
     if not numbers:
         raise ValueError("未找到整数参数")
-    if "gcd" in low or "最大公约数" in low:
+    if _contains_hint("gcd", low) or "最大公约数" in low:
         operation = "gcd"
-    elif "lcm" in low or "最小公倍数" in low:
+    elif _contains_hint("lcm", low) or "最小公倍数" in low:
         operation = "lcm"
-    elif "factor" in low or "质因数" in low or "因数分解" in low:
+    elif _contains_hint("factor", low) or "质因数" in low or "因数分解" in low:
         operation = "factorization"
-    elif "prime" in low or "质数" in low:
+    elif _contains_hint("prime", low) or "质数" in low:
         operation = "primality"
     else:
         raise ValueError("无法识别的数论题型")

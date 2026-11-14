@@ -18,8 +18,15 @@ dependencies = [
 build = ["pyinstaller>=6"]
 
 [project.scripts]
-math-solver = "solve:main"
+math-solver = "app.cli:main"
+math-solver-web = "app.web:main"
 
 [tool.setuptools]
-packages = ["solver"]
-py-modules = ["solve", "webapp"]
+packages = ["app", "solver"]
+
+[tool.setuptools.package-data]
+app = [
+    "assets/*",
+    "assets/katex/*",
+    "assets/katex/fonts/*",
+]

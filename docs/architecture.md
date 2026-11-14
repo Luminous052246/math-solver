@@ -30,7 +30,7 @@
 | `solver/sympy_backend.py` | 算术、化简、方程、微积分、级数、微分方程、矩阵、数论 |
 | `solver/z3_backend.py` | 整数或实数约束。表达式用 AST 解释 |
 | `solver/verify.py` | 独立检查。结果是通过、未通过或无法验证 |
-| `solver/text.py` | 把 Unicode、全角符号和隐式乘法归一化后解析。表达式只允许数字、字母、运算符、括号、逗号、百分号和空白，并拒绝 `__`、`import`、`eval`、`exec`、`lambda`、`open(`、`os.`、`sys.`。不使用 `eval`。矩阵字面量用 `ast.literal_eval` |
-| `webapp.py` | 标准库 HTTP 服务。页面在 `webapp_assets/` |
+| `solver/text.py` | 把 Unicode、全角符号和隐式乘法归一化后，用 SymPy 的 `parse_expr` 解析。解析前只允许数字、字母、运算符、括号、逗号、百分号和空白，并拒绝 `__`、`import`、`eval`、`exec`、`lambda`、`open(`、`os.`、`sys.`。矩阵字面量用 `ast.literal_eval` |
+| `app/web.py` | 标准库 HTTP 服务。页面在 `app/assets/` |
 
 `Solution.planner` 记录来源：`rule`、`llm` 或 `spec`。`Solution.task` 保存实际执行的任务。规则成功且验证没有失败时，不请求模型。

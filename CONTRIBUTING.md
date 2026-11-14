@@ -21,7 +21,7 @@ ollama pull qwen2.5:7b
 ollama pull qwen2.5vl:7b
 ```
 
-未设置变量时，求解库使用 `https://api.openai.com/v1` 和 `gpt-4o-mini`。直接运行 `webapp.py` 时，若变量尚未设置，则指向本机 Ollama 的 `qwen2.5:7b` 和 `qwen2.5vl:7b`。Windows CMD 使用 `set`，需要保留到以后的窗口时使用 `setx`。
+未设置变量时，求解库使用 `https://api.openai.com/v1` 和 `gpt-4o-mini`。直接运行 `python -m app.web` 时，若变量尚未设置，则指向本机 Ollama 的 `qwen2.5:7b` 和 `qwen2.5vl:7b`。Windows CMD 使用 `set`，需要保留到以后的窗口时使用 `setx`。
 
 | 变量 | 作用 |
 | --- | --- |

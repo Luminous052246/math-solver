@@ -4,6 +4,20 @@ Math Solver 用规则把数学题整理成结构化任务，再交给 SymPy 和 
 
 支持算术、化简、方程、微积分、极限、级数、微分方程、矩阵、数论和整数或实数约束。
 
+## 快速开始
+
+需要 Python 3.10 或更高版本。在仓库根目录执行：
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m app.cli --problem "solve x**2 - 5*x + 6 = 0"
+python -m app.web
+```
+
+Windows 激活虚拟环境使用 `.venv\Scripts\activate`。网页默认地址是 <http://127.0.0.1:8765>。各题型的行为和限制见[功能目录](docs/features.md)，命令说明见[使用](docs/usage.md)。
+
 ## 文档
 
 - [功能目录](docs/features.md)：已实现的功能、限制和相关代码。

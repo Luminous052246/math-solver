@@ -1,11 +1,11 @@
 """Math Solver 本地网页界面(零第三方依赖)。
 
 运行:
-    python webapp.py                 # 默认 http://127.0.0.1:8765
-    python webapp.py --port 9000
-    python webapp.py --no-browser    # 不自动打开浏览器
+    python -m app.web                 # 默认 http://127.0.0.1:8765
+    python -m app.web --port 9000
+    python -m app.web --no-browser    # 不自动打开浏览器
 
-页面文件在 webapp_assets/（index.html、style.css、app.js）。
+页面文件在 app/assets/（index.html、style.css、app.js）。
 页面包含:
     1. 单题求解:输入题目 -> 规则/LLM 规划 -> 符号求解 -> 答案
     2. 图片/手写识别:上传题目图片或在手写板书写,由本地 Ollama 视觉模型识别后填入输入框
@@ -26,6 +26,7 @@ import urllib.error
 import urllib.request
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from importlib.resources import files
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -35,8 +36,7 @@ from solver import solve_with_planner
 from solver.core import route_problem
 from solver.text import normalize_text, parse_symbolic
 
-ROOT = Path(__file__).resolve().parent
-ASSET_ROOT = ROOT / "webapp_assets"
+_ASSETS = files("app").joinpath("assets")
 ASSET_TYPES = {
     ".css": "text/css; charset=utf-8",
     ".js": "application/javascript; charset=utf-8",
@@ -293,6 +293,8 @@ def solve_payload(text: str) -> dict:
         "answer_latex": answer_to_latex(solution.answer) if solution.ok else None,
         "error": solution.error,
         "steps": solution.steps,
+        "verified": solution.verified,
+        "verification": solution.verification,
         "elapsed_ms": round(elapsed_ms, 1),
     }
 
@@ -317,17 +319,16 @@ class Handler(BaseHTTPRequestHandler):
 
     def _send_asset(self, path: str) -> None:
         relative = path[len("/assets/"):]
-        target = (ASSET_ROOT / relative).resolve()
-        try:
-            target.relative_to(ASSET_ROOT.resolve())
-        except ValueError:
+        parts = Path(relative).parts
+        if not parts or any(part in {"", ".", ".."} for part in parts):
             self._send_json({"error": "not found"}, 404)
             return
+        target = _ASSETS.joinpath(*parts)
         if not target.is_file():
             self._send_json({"error": "not found"}, 404)
             return
         content_type = ASSET_TYPES.get(
-            target.suffix.lower(), "application/octet-stream"
+            Path(relative).suffix.lower(), "application/octet-stream"
         )
         self._send(200, target.read_bytes(), content_type)
 
@@ -402,7 +403,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def _load_index_html() -> str:
     """读取页面模板，并填入示例题。"""
-    template = (ASSET_ROOT / "index.html").read_text(encoding="utf-8")
+    template = _ASSETS.joinpath("index.html").read_text(encoding="utf-8")
     return template.replace("/*__EXAMPLES__*/", json.dumps(EXAMPLES, ensure_ascii=False))
 
 

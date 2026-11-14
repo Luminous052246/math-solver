@@ -35,10 +35,10 @@ def main() -> None:
         "--collect-all",
         "z3",
         "--add-data",
-        f"webapp_assets{separator}webapp_assets",
+        f"app/assets{separator}app/assets",
         "--add-data",
         f"data{separator}data",
-        "webapp.py",
+        "app/web.py",
     ]
     subprocess.run(command, cwd=ROOT, check=True)
     print(f"构建完成: dist/math-solver{suffix}")

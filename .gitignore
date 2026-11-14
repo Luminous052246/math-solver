@@ -13,7 +13,6 @@ build/
 dist/
 *.spec
 *.egg-info/
-*.egg-info/
 
 # 临时文件
 _*.txt

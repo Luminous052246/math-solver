@@ -27,10 +27,11 @@ echo Starting Math Solver web UI with: %PY%
 echo Add --host 0.0.0.0 to listen on the LAN. Other arguments are passed through.
 echo Press Ctrl+C to stop the server.
 echo.
-"%PY%" webapp.py %*
+"%PY%" -m app.web %*
+set "EXITCODE=%ERRORLEVEL%"
 echo.
 pause
-exit /b 0
+exit /b %EXITCODE%
 
 :try
 if "%~1"=="" exit /b 0

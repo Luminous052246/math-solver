@@ -4,6 +4,10 @@
 
 ```text
 math-solver/
+├── app/                     命令行和网页入口
+│   ├── cli.py               命令行
+│   ├── web.py               本地网页服务
+│   └── assets/              页面、样式、脚本和 KaTeX
 ├── solver/                  求解器
 │   ├── rules.py             自然语言到 TaskSpec
 │   ├── taskspec.py          任务字段与校验
@@ -20,9 +24,6 @@ math-solver/
 │   └── core.py              规则求解入口
 ├── tests/                   单元测试，使用假的模型响应
 ├── data/problems.jsonl      评测题
-├── webapp.py                本地网页服务
-├── webapp_assets/           页面、样式、脚本和 KaTeX
-├── solve.py                 命令行入口
 ├── scripts/                 start_web.bat、start_web.sh
 ├── tools/                   评测、打包和源码发布
 ├── docs/
@@ -51,8 +52,8 @@ math-solver/
 | 答案检查 | `solver/verify.py` |
 | 表达式允许的字符 | `solver/text.py` |
 | 是否请求模型 | `solver/planner.py` |
-| 命令行参数和输出 | `solve.py` |
-| 网页求解、识别和页面 | `webapp.py`、`webapp_assets/` |
+| 命令行参数和输出 | `app/cli.py` |
+| 网页求解、识别和页面 | `app/web.py`、`app/assets/` |
 | 评测题 | `data/problems.jsonl`、`tests/` |
 | 网页启动脚本 | `scripts/start_web.bat`、`scripts/start_web.sh` |
 | 打包和源码发布 | `tools/build.py`、`tools/make_release.py` |

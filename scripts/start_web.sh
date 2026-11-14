@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start the local web UI. Extra arguments are passed through to webapp.py.
+# Start the local web UI. Extra arguments are passed through to app.web.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -46,4 +46,4 @@ echo "Starting Math Solver web UI with: $PY"
 echo "Add --host 0.0.0.0 to listen on the LAN. Other arguments are passed through."
 echo "Press Ctrl+C to stop the server."
 echo
-exec "$PY" webapp.py "$@"
+exec "$PY" -m app.web "$@"

@@ -139,9 +139,15 @@
 
   .answer { padding: 22px 24px; border-radius: var(--radius); border: 1px solid; margin-bottom: 14px; }
   .answer.ok { background: linear-gradient(180deg, #f9fdfb, var(--green-soft)); border-color: var(--green-line); }
+  .answer.ok.verify-fail { background: linear-gradient(180deg, #fffbfa, var(--red-soft)); border-color: var(--red-line); }
   .answer.fail { background: linear-gradient(180deg, #fffbfa, var(--red-soft)); border-color: var(--red-line); }
+  .verify { margin-top: 12px; font-size: 13px; line-height: 1.5; }
+  .verify-pass { color: var(--green); }
+  .verify-fail { color: var(--red); }
+  .verify-none { color: var(--muted); }
   .answer-label { font-size: 12px; letter-spacing: .09em; margin-bottom: 8px; color: var(--muted); }
   .answer.ok .answer-label { color: var(--green); }
+  .answer.ok.verify-fail .answer-label { color: var(--red); }
   .answer.fail .answer-label { color: var(--red); }
   .answer-math { font-size: 22px; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
   .answer-math .katex-display { margin: .3em 0; }

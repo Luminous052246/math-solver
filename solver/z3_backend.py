@@ -17,6 +17,55 @@ from .verify import Verification, attach
 _COMPARATOR_RE = re.compile(r"==|!=|<=|>=|=|<|>")
 
 
+def _is_python_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _as_real(value):
+    if isinstance(value, bool):
+        raise ValueError("不支持布尔字面量")
+    if isinstance(value, int):
+        return z3.RealVal(value)
+    if isinstance(value, float):
+        return z3.RealVal(value)
+    if z3.is_int(value):
+        return z3.ToReal(value)
+    if z3.is_real(value):
+        return value
+    raise ValueError("除法 / 的操作数无法按实数解释")
+
+
+def _math_div(left, right):
+    """`/` 按有理数或实数除法解释，不改成整数除法。"""
+    if _is_python_number(left) and _is_python_number(right):
+        return left / right
+    return _as_real(left) / _as_real(right)
+
+
+def _as_int(value, label: str):
+    if isinstance(value, bool) or isinstance(value, float):
+        raise ValueError(f"{label}只能用于整数")
+    if isinstance(value, int) or z3.is_int(value):
+        return value
+    raise ValueError(f"{label}只能用于整数")
+
+
+def _int_div(left, right):
+    """`//` 是显式整数除法。实数操作数直接拒绝。"""
+    left_value = _as_int(left, "整数除法 // ")
+    right_value = _as_int(right, "整数除法 // ")
+    if isinstance(left_value, int) and isinstance(right_value, int):
+        return left_value // right_value
+    return left_value / right_value
+
+
+def _int_mod(left, right):
+    """`%` 是整数取模。实数操作数直接拒绝。"""
+    left_value = _as_int(left, "取模 % ")
+    right_value = _as_int(right, "取模 % ")
+    return left_value % right_value
+
+
 def _eval_node(node: ast.AST, env: dict):
     if isinstance(node, ast.Constant):
         if isinstance(node.value, bool):
@@ -40,11 +89,11 @@ def _eval_node(node: ast.AST, env: dict):
         if isinstance(node.op, ast.Mult):
             return left * right
         if isinstance(node.op, ast.Div):
-            return left / right
+            return _math_div(left, right)
         if isinstance(node.op, ast.FloorDiv):
-            return left / right
+            return _int_div(left, right)
         if isinstance(node.op, ast.Mod):
-            return left % right
+            return _int_mod(left, right)
         raise ValueError("不支持二元运算符")
 
     if isinstance(node, ast.UnaryOp):

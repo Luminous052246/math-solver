@@ -261,6 +261,23 @@ function renderMath(element, tex, fallback, display) {
   element.textContent = fallback;
 }
 
+function verificationLine(data) {
+  let state = "verify-none";
+  let label = "未能完成验证";
+  if (data.verified === true) {
+    state = "verify-pass";
+    label = "验证通过";
+  } else if (data.verified === false) {
+    state = "verify-fail";
+    label = "验证未通过";
+  }
+  const line = make("div", "verify " + state, label);
+  if (data.verification) {
+    line.appendChild(document.createTextNode(" — " + data.verification));
+  }
+  return line;
+}
+
 function renderResult(data) {
   const box = document.getElementById("result");
   box.innerHTML = "";
@@ -281,6 +298,7 @@ function renderResult(data) {
   wrap.appendChild(metrics);
 
   const banner = make("div", "answer " + (data.ok ? "ok" : "fail"));
+  if (data.ok && data.verified === false) banner.classList.add("verify-fail");
   if (data.ok) {
     banner.appendChild(make("div", "answer-label", "答案"));
     const answer = make("div", "answer-math");
@@ -291,6 +309,7 @@ function renderResult(data) {
       answer.textContent = String(data.answer);
     }
     banner.appendChild(answer);
+    banner.appendChild(verificationLine(data));
   } else {
     banner.appendChild(make("div", "answer-label", "未能求解"));
     banner.appendChild(make("div", "answer-fail-text", data.error || "未知错误"));
