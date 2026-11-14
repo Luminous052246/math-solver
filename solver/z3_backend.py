@@ -1,11 +1,6 @@
-"""Z3 后端:整数/实数线性约束求解。
+"""Z3 后端:按 TaskSpec 求解整数/实数约束。
 
-支持的题目格式:
-    find integers x and y such that x + y = 10 and x - y = 4
-    find integers x such that x > 3 and x < 6 and x != 4
-
-Z3 是 SMT 求解器,能给出可满足解、判定无解,并检查解是否唯一。
-约束中的表达式用 Python AST 安全解析,不使用 eval。
+自然语言格式由 rules.py 解析。约束表达式用 Python AST 解释,不使用 eval。
 """
 
 from __future__ import annotations
@@ -15,6 +10,7 @@ import re
 
 import z3
 
+from .taskspec import TaskSpec
 from .types import Solution
 from .verify import Verification, attach
 
@@ -94,38 +90,17 @@ def _parse_constraint(text: str, env: dict):
     raise ValueError(f"不支持的比较符: {op}")
 
 
-def solve(text: str) -> Solution:
-    match = re.search(
-        r"find\s+(integers?|reals?)\s+(.+?)\s+such that\s+(.+)",
-        text,
-        flags=re.IGNORECASE,
-    )
-    if not match:
-        raise ValueError(
-            "约束题格式应为: find integers x and y such that <约束1> and <约束2>"
-        )
-
-    domain = match.group(1).lower()
-    var_names = [
-        name
-        for name in re.findall(r"[a-zA-Z]\w*", match.group(2))
-        if name.lower() not in {"and", "or"}
-    ]
+def execute(spec: TaskSpec) -> Solution:
+    """按约束任务的变量、定义域和约束列表求解。"""
+    var_names = list(spec.variables)
+    constraints = list(spec.constraints)
     if not var_names:
         raise ValueError("未找到变量声明")
-
-    use_int = domain.startswith("integer")
-    env = {
-        name: z3.Int(name) if use_int else z3.Real(name) for name in var_names
-    }
-
-    constraints = [
-        part.strip()
-        for part in re.split(r"\s+and\s+", match.group(3))
-        if part.strip()
-    ]
     if not constraints:
         raise ValueError("未找到约束条件")
+
+    use_int = spec.domain == "integer"
+    env = {name: z3.Int(name) if use_int else z3.Real(name) for name in var_names}
 
     solver = z3.Solver()
     parsed_constraints = [_parse_constraint(constraint, env) for constraint in constraints]
@@ -140,7 +115,7 @@ def solve(text: str) -> Solution:
     result = solver.check()
     if result == z3.unsat:
         solution = Solution(
-            problem=text,
+            problem="",
             problem_type="constraint",
             backend="z3",
             ok=True,
@@ -150,7 +125,7 @@ def solve(text: str) -> Solution:
         return attach(solution, Verification(None, "无解结论未做独立验证"))
     if result == z3.unknown:
         return Solution(
-            problem=text,
+            problem="",
             problem_type="constraint",
             backend="z3",
             ok=False,
@@ -171,7 +146,7 @@ def solve(text: str) -> Solution:
 
     answer = ", ".join(f"{name} = {value}" for name, value in values)
     solution = Solution(
-        problem=text,
+        problem="",
         problem_type="constraint",
         backend="z3",
         ok=True,

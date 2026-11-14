@@ -27,7 +27,7 @@ from solver.types import Solution
 def print_solution(solution: Solution) -> None:
     print(f"题目: {solution.problem}")
     print(f"类型: {solution.problem_type} | 后端: {solution.backend or '-'}")
-    if solution.planner != "rule" or solution.task:
+    if solution.planner != "rule":
         task = json.dumps(solution.task, ensure_ascii=False) if solution.task else "-"
         print(f"规划: {solution.planner} | 任务: {task}")
     if solution.steps:

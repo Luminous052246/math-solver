@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 import unittest
 
+from unittest.mock import patch
+
 from solver import (
     SpecError,
     TaskSpec,
@@ -44,6 +46,8 @@ class RuleFirstTests(unittest.TestCase):
         self.assertTrue(solution.ok)
         self.assertEqual(solution.answer, "5")
         self.assertEqual(solution.planner, "rule")
+        self.assertEqual(solution.task["type"], "arithmetic")
+        self.assertEqual(solution.task["expression"], "(12 + 8) / 4")
         self.assertEqual(fake.calls, [])
 
     def test_natural_language_falls_back_to_llm(self) -> None:
@@ -195,6 +199,25 @@ class ExecuteSpecTests(unittest.TestCase):
                     False,
                     solution.verification,
                 )
+
+    def test_execution_does_not_reparse_canonical_text(self) -> None:
+        spec = TaskSpec.from_dict(
+            {
+                "type": "limit",
+                "expression": "1/x",
+                "variables": ["x"],
+                "point": "0",
+                "direction": "-",
+            }
+        )
+        with patch.object(
+            TaskSpec,
+            "canonical_problem",
+            side_effect=AssertionError("执行路径不应回读题面"),
+        ):
+            solution = execute_spec(spec, "原题")
+        self.assertTrue(solution.ok, solution.error)
+        self.assertEqual(solution.answer, "-oo")
 
 
 class CanonicalTests(unittest.TestCase):

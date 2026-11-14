@@ -3,26 +3,29 @@ chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
 
-rem Find a Python interpreter that has sympy and z3.
+rem Prefer an explicit interpreter, then the project virtual environment, then python on PATH.
 set "PY="
 call :try "%MATH_SOLVER_PYTHON%"
 if defined PY goto run
-call :try "python"
+call :try "%~dp0.venv\Scripts\python.exe"
 if defined PY goto run
-call :try "D:\miniconda\envs\MyPytorch\python.exe"
+call :try "python"
 if defined PY goto run
 
 echo.
-echo [ERROR] No Python with sympy/z3 found.
-echo Install them first:  pip install -r requirements.txt
-echo Or set MATH_SOLVER_PYTHON to your python.exe path.
+echo [ERROR] No Python with sympy and z3 found.
+echo Create one from this directory:
+echo   python -m venv .venv
+echo   .venv\Scripts\python -m pip install -r requirements.txt
+echo Or set MATH_SOLVER_PYTHON to that interpreter.
 echo.
 pause
 exit /b 1
 
 :run
 echo Starting Math Solver web UI with: %PY%
-echo Close this window or press Ctrl+C to stop the server.
+echo Add --host 0.0.0.0 to listen on the LAN. Other arguments are passed through.
+echo Press Ctrl+C to stop the server.
 echo.
 "%PY%" webapp.py %*
 echo.
