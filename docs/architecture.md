@@ -1,6 +1,6 @@
 # 架构
 
-求解只有一条计算路径：先得到 `TaskSpec`，再按字段调用 SymPy 或 Z3。规则和 LLM 的差别只在于谁产生这份任务。
+求解只有一条计算路径：先得到 `TaskSpec`，再按字段调用 SymPy 或 Z3。规则和 LLM 的差别只在于谁产生这份任务。字段见[任务协议](taskspec.md)，检查方法见[验证](verification.md)，功能与限制见[功能目录](features.md)。
 
 ```text
 自然语言
@@ -30,11 +30,7 @@
 | `solver/sympy_backend.py` | 算术、化简、方程、微积分、级数、微分方程、矩阵、数论 |
 | `solver/z3_backend.py` | 整数或实数约束。表达式用 AST 解释 |
 | `solver/verify.py` | 独立检查。结果是通过、未通过或无法验证 |
-| `solver/text.py` | 字符白名单和符号解析。不使用 `eval` |
+| `solver/text.py` | 把 Unicode、全角符号和隐式乘法归一化后解析。表达式只允许数字、字母、运算符、括号、逗号、百分号和空白，并拒绝 `__`、`import`、`eval`、`exec`、`lambda`、`open(`、`os.`、`sys.`。不使用 `eval`。矩阵字面量用 `ast.literal_eval` |
 | `webapp.py` | 标准库 HTTP 服务。页面在 `webapp_assets/` |
 
-`Solution.planner` 记录来源：`rule`、`llm` 或 `spec`。`Solution.task` 保存实际执行的任务。规则成功时不会请求模型。
-
-## 规则做不到的事
-
-关键词路由不理解需要先设未知数、再列方程的应用题。LLM 目前也只翻译单个任务，不会自动拆成多步求解。方程默认在复数域。Z3 路径面向可以用算术和比较表达的约束，非线性与整数除法没有完整支持。微分方程只处理未知函数 `y(x)`，没有初值条件。
+`Solution.planner` 记录来源：`rule`、`llm` 或 `spec`。`Solution.task` 保存实际执行的任务。规则成功且验证没有失败时，不请求模型。

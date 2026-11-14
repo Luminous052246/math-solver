@@ -1,13 +1,13 @@
 @echo off
 chcp 65001 >nul
 setlocal
-cd /d "%~dp0"
+cd /d "%~dp0.."
 
 rem Prefer an explicit interpreter, then the project virtual environment, then python on PATH.
 set "PY="
 call :try "%MATH_SOLVER_PYTHON%"
 if defined PY goto run
-call :try "%~dp0.venv\Scripts\python.exe"
+call :try "%~dp0..\.venv\Scripts\python.exe"
 if defined PY goto run
 call :try "python"
 if defined PY goto run

@@ -22,4 +22,4 @@ math-solver = "solve:main"
 
 [tool.setuptools]
 packages = ["solver"]
-py-modules = ["solve", "evaluate", "webapp"]
+py-modules = ["solve", "webapp"]
